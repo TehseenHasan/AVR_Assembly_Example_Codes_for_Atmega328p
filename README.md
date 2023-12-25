@@ -4,8 +4,8 @@ This repository contains my x86 Assembly Lab Manuals, AVR Assembly Lab Manuals, 
 
 There are total 14 Lab Manuals where:
 
- - Lab 1-12 are based on x86 Assembly
- - Lab 13-14 are based on AVR Assembly
+ - Lab 1-11 are based on x86 Assembly
+ - Lab 12-14 are based on AVR Assembly
 
 All the other materials, tools, etc. used in the Lab Manuals are also available in this repo.
 
