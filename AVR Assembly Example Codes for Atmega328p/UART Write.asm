@@ -41,7 +41,7 @@ loop:
 	
 	delay 500
 
-	; send an integer array to the UART
+	; send an constant (integer array) to the UART
 	LDI ZL, LOW (2 * hello_buffer)
 	LDI ZH, HIGH (2 * hello_buffer)
 	LDI r20, hello_buffer_len
@@ -49,7 +49,7 @@ loop:
 	
 	delay 500
 
-	; send an ASCII-encoded integer array to the UART
+	; send an ASCII-encoded constant integer array to the UART
 	LDI ZL, LOW (2 * hello_buffer)
 	LDI ZH, HIGH (2 * hello_buffer)
 	LDI r20, hello_buffer_len
@@ -60,7 +60,8 @@ loop:
 rjmp loop
 
 
-; it is recommanded to define the arrays, strings, etc. at the end of the code segment
+; it is recommanded to define the constants (arrays, strings, etc.) at the end of the code segment
+; .db directive is used to decalre constants
 
 hello_string:	.db	"Hello World",0x0D,0x0A,0
 
