@@ -311,7 +311,9 @@
 ;	LDI ZH, HIGH (2 * hello_string)
 ;	LDI r20, string_len
 ;	
-;	it is recommanded to define the strings at the end of the code segment
+; it is recommanded to define the constants (arrays, strings, etc.) at the end of the code segment
+; .db directive is used to declare constants
+;
 ;		hello_string:	.db	"Hello World",0
 ;		len: .equ	string_len   = (2 * (len - hello_string)) - 1
 ;
