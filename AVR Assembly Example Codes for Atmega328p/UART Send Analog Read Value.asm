@@ -60,8 +60,9 @@ rjmp loop
 rjmp loop
 
 
-; It is recommanded to define the strings at the end of the code segment.
-; Optionally you can use CRLF (carriage return/line feed) characters 0x0D and 0x0A at the end of the string.
+; it is recommanded to define the constants (arrays, strings, etc.) at the end of the code segment
+; .db directive is used to decalre constants
+; You should use CRLF (carriage return/line feed) characters 0x0D and 0x0A at the end of the string.
 ; The string should be terminated with 0.
 ; The overall length of the string (including CRLF and ending zero) must be even number of bytes.
 
