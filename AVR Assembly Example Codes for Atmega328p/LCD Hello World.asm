@@ -22,7 +22,7 @@ delay 500
 LCD_backlight_ON	; Turn On the LCD Backlight
 
 loop:
-	; Display a Null-terminated string on LCD
+	; Display a Null-terminated constant string on LCD
 	LDI ZL, LOW (2 * hello_string)
 	LDI ZH, HIGH (2 * hello_string)
 	LDI R20, string_len
@@ -68,7 +68,8 @@ loop:
 rjmp loop
 
 
-; it is recommanded to define the strings at the end of the code segment
+; it is recommanded to define the constants (arrays, strings, etc.) at the end of the code segment
+; .db directive is used to decalre constants
 ; The length of the string must be even number of bytes
 
 hello_string:	.db	"Tehseen",0
