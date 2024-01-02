@@ -8,6 +8,8 @@
 ;	LCD_send_a_character
 ;	LCD_send_a_register
 ;	LCD_send_a_string
+;	LCD_LCD_clear
+;	LCD_LCD_home
 ;	div
 
 
@@ -21,6 +23,7 @@
 ;   D7   ---------------  7 (PD7)
 ;   A   ----------------  13 (PB5)	; Anode pin of LCD Backlight LED
 
+
 ; Macro to initilize the 16x2 LCD
 .macro LCD_init
 	; Setting pins to Output for LCD
@@ -33,9 +36,58 @@
 	sbi DDRB,PB1 ; E pin of LCD
 	;Setting LCD Backlight pin
 	sbi DDRB,PB5 ; LCD Backlight control pin (BLA or A pin of LCD)
-	LCD_send_a_command 0x01 ; sending all clear command
-	LCD_send_a_command 0x28 ; set LCD to 4-bit mode
-	LCD_send_a_command 0x0C ; screen on, Cursor off 
+
+	; SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
+	; according to datasheet, we need at least 40 ms after power rises above 2.7 V
+	; before sending commands. Arduino can turn on way before 4.5 V so we'll wait 50ms
+	delay 50
+	
+	; Now we pull both RS and E pins LOW to begin commands
+	cbi PORTB, PB0 ; RS pin of LCD
+	cbi PORTB, PB1 ; E pin of LCD
+
+	; put the LCD into 4 bit or 8 bit mode
+	; this is according to the Hitachi HD44780 datasheet
+	; figure 24, pg 46
+	
+	; we start in 8bit mode, try to set 4 bit mode
+	LCD_send_a_command 0x03
+	delay 5	; wait min 4.1ms
+
+	; second try
+	LCD_send_a_command 0x03
+	delay 5	; wait min 4.1ms
+		
+	; third go!
+	LCD_send_a_command 0x03
+	delay 1
+	
+	; finally, set to 4-bit interface
+	LCD_send_a_command 0x02
+
+	; finally, set # lines, font size, etc.
+	LCD_send_a_command 0x28
+
+	; turn the display on with no cursor or blinking default
+	LCD_send_a_command 0x0C
+	
+	; clear it off
+	LCD_clear
+
+	; Initialize to default text direction
+	LCD_send_a_command 0x06
+.endmacro
+
+; Macro to clear the LCD
+.macro LCD_clear
+	LCD_send_a_command 0x01
+	delay 10  ; this command takes a long time!
+.endmacro
+
+; Macro to set LCD cursor position to zero
+.macro LCD_home
+	LCD_send_a_command 0x02
+	delay 10  ; this command takes a long time!
 .endmacro
 
 ; Macro to Turn OFF the LCD Backlight
@@ -59,6 +111,7 @@
 	CBI PORTD, PD6         ; Clear PD6
 	CBI PORTD, PD5         ; Clear PD5
 	CBI PORTD, PD4         ; Clear PD4
+	CBI PORTB, PB0         ; Set RS pin to LOW (set LCD mode to "Command Mode")
 	; Send the upper 4 bits of the Command to LCD
 	SBRC r16, 7            ; Check the MSB (7th bit)
 	SBI PORTD, PD7         ; Set PD7 according to the command bit
@@ -69,7 +122,6 @@
 	SBRC r16, 4            ; Check the 4th bit
 	SBI PORTD, PD4         ; Set PD4 according to the command bit
 
-	CBI PORTB, PB0         ; Set RS pin to LOW (set LCD mode to "Command Mode")
 	SBI PORTB, PB1         ; Set E pin to HIGH (set LCD to receive the command)
 	delay 10
 	CBI PORTB, PB1         ; Set E pin to LOW (set LCD to process the command)
@@ -113,6 +165,7 @@
 	CBI PORTD, PD6         ; Clear PD6
 	CBI PORTD, PD5         ; Clear PD5
 	CBI PORTD, PD4         ; Clear PD4
+	SBI PORTB, PB0         ; Set RS pin to HIGH (set LCD mode to "Data Mode")
 	; Send the upper 4 bits of the Character to LCD
 	SBRC r16, 7            ; Check the MSB (7th bit)
 	SBI PORTD, PD7         ; Set PD7 according to the data bit
@@ -123,7 +176,6 @@
 	SBRC r16, 4            ; Check the 4th bit
 	SBI PORTD, PD4         ; Set PD4 according to the data bit
 
-	SBI PORTB, PB0         ; Set RS pin to HIGH (set LCD mode to "Data Mode")
 	SBI PORTB, PB1         ; Set E pin to HIGH (set LCD to receive the data)
 	delay 10
 	CBI PORTB, PB1         ; Set E pin to LOW (set LCD to process the data)
@@ -241,6 +293,7 @@
 	CBI PORTD, PD6         ; Clear PD6
 	CBI PORTD, PD5         ; Clear PD5
 	CBI PORTD, PD4         ; Clear PD4
+	SBI PORTB, PB0         ; Set RS pin to HIGH (set LCD mode to "Data Mode")
 	; Send the upper 4 bits of the Register to LCD
 	SBRC r16, 7            ; Check the MSB (7th bit)
 	SBI PORTD, PD7         ; Set PD7 according to the data bit
@@ -251,7 +304,6 @@
 	SBRC r16, 4            ; Check the 4th bit
 	SBI PORTD, PD4         ; Set PD4 according to the data bit
 
-	SBI PORTB, PB0         ; Set RS pin to HIGH (set LCD mode to "Data Mode")
 	SBI PORTB, PB1         ; Set E pin to HIGH (set LCD to receive the data)
 	delay 10
 	CBI PORTB, PB1         ; Set E pin to LOW (set LCD to process the data)
@@ -340,6 +392,7 @@
 		CBI PORTD, PD6         ; Clear PD6
 		CBI PORTD, PD5         ; Clear PD5
 		CBI PORTD, PD4         ; Clear PD4
+		SBI PORTB, PB0         ; Set RS pin to HIGH (set LCD mode to "Data Mode")
 		; Send the upper 4 bits of the Register to LCD
 		SBRC r16, 7            ; Check the MSB (7th bit)
 		SBI PORTD, PD7         ; Set PD7 according to the data bit
@@ -350,7 +403,6 @@
 		SBRC r16, 4            ; Check the 4th bit
 		SBI PORTD, PD4         ; Set PD4 according to the data bit
 
-		SBI PORTB, PB0         ; Set RS pin to HIGH (set LCD mode to "Data Mode")
 		SBI PORTB, PB1         ; Set E pin to HIGH (set LCD to receive the data)
 		delay 10
 		CBI PORTB, PB1         ; Set E pin to LOW (set LCD to process the data)
@@ -456,5 +508,5 @@
 ; *		Macros written by:													*
 ; *			Syed Tehseen ul Hasan Shah										*
 ; *			Lecturer, University of Engineering and Technology Lahore.		*
-; *			24-December-2023												*
+; *			03-January-2024												*
 ; ***************************************************************************
